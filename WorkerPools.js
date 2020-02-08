@@ -28,7 +28,22 @@ export default class WorkerPool {
   }
 
   postMessage(msg) {
-    this.workers[0].postMessage(msg);
+    if (this.workers.length) {
+      this.workers.pop().postMessage(msg);
+      // this.workers[0].postMessage(msg);
+    }
+  }
+
+  terminate() {
+    this.workers.length = 0;
+    console.log("terminate inside workerpool ", this.workers);
+    return this.workers;
+  }
+
+  isReady() {
+    debugger;
+    console.log("worker is ready from workperpool ", this.workers.length);
+    return this.workers.length;
   }
 
   //   this.workers = new Map();
