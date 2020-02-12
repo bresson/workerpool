@@ -9,36 +9,51 @@ import WorkerPool from "./WorkerPools";
 // console.log("123 ", workerpool);
 
 function useWorkerStatus({ workers }) {
-  console.log("worker prop inside useWorkerStatus ", workers);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (workers.isReady()) {
+    console.log("worker prop inside useWorkerStatus ", workers);
+    if (workers && workers.isReady()) {
       setReady(true);
+    } else {
+      setReady(false);
     }
   }, [workers, ready]);
-  console.log("ready inside useWorkerStatus useeffect ", ready);
+  // console.log("ready inside useWorkerStatus useeffect ", ready);
 
   return ready;
 }
 
-function useWorker(workerStatus, workers) {
+function useWorker(workerStatus, { workers }, action) {
   const [ready, setReady] = useState(workerStatus);
 
   useEffect(() => {
-    if (workerStatus) {
-      setReady(true);
+    setReady(workerStatus);
+  }, [workerStatus]);
+
+  useEffect(() => {
+    debugger;
+    // console.log("worker prop inside useWorker ", workers);
+    // setReady(workerStatus);
+    // console.log("workers indise useWorker ", workers);
+    if (ready) {
+      // console.log(
+      //   "workers.workers ",
+      //   workers.workers.postMessage("hello from curry")
+      // );
+      console.log("workers inside useeffect ", workers);
+      workers.postMessage({ work: "heard message and sending back" });
     }
   }, [workers, ready, workerStatus]);
 
   console.log("ready useWorker useeffect ", ready);
   if (ready) {
-    console.log("inside checking if curried is ready to return  YES");
-    return function() {
-      console.log("inside curried function 2");
+    // console.log("inside checking if curried is ready to return  YES");
+    return function(msg) {
+      // console.log("inside curried function 2");
       return (
         <React.Fragment>
-          <h2>use worker is ready to go!!!</h2>
+          <h2>{msg}</h2>
         </React.Fragment>
       );
     };
@@ -50,10 +65,11 @@ const TestWorkers = workerpool => {
   const compute = useWorker(isWorkerReady, workerpool);
 
   let isCompute;
-  let computed;
+  let computed, computed2;
   if (compute) {
     isCompute = `<span>compute is ready</span>`;
-    computed = compute();
+    computed = compute("first computed!");
+    computed2 = compute("second computed");
   } else {
     isCompute = `<span>compute is not ready</span>`;
   }
@@ -63,6 +79,7 @@ const TestWorkers = workerpool => {
         {isWorkerReady.toString()} : {isCompute} :
       </h1>
       <div> {computed}</div>
+      <div> {computed2}</div>
     </React.Fragment>
   );
 };
@@ -78,8 +95,10 @@ class App extends React.Component {
   deleteWebWorker(e) {
     console.log("deleting workers ", e);
 
+    this.state.workerpool.terminate();
+
     this.setState((state, props) => ({
-      workerpool: this.state.workerpool.terminate()
+      workerpool: ""
     }));
     console.log("deleted workers ", this.state.workerpool);
   }

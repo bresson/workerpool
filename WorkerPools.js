@@ -17,6 +17,13 @@ export default class WorkerPool {
     //     // resolve function, and it can take on work.
     // this.workers.set(_w, null);
     //   }
+    this.postMessage = this.postMessage.bind(this);
+  }
+
+  addEventListener(elem) {
+    return elem.addEventListener("message", e => {
+      console.log("elem returns message ", e);
+    });
   }
 
   init() {
@@ -24,12 +31,15 @@ export default class WorkerPool {
       this.workers.push(new window.Worker(this.script));
     }
 
+    this.workers.map(elem => this.addEventListener(elem));
+
     return this;
   }
 
   postMessage(msg) {
     if (this.workers.length) {
-      this.workers.pop().postMessage(msg);
+      const _worker = this.workers.pop();
+      _worker.postMessage(msg);
       // this.workers[0].postMessage(msg);
     }
   }
@@ -41,9 +51,12 @@ export default class WorkerPool {
   }
 
   isReady() {
-    debugger;
     console.log("worker is ready from workperpool ", this.workers.length);
     return this.workers.length;
+  }
+
+  concurrency() {
+    this.concurrency;
   }
 
   //   this.workers = new Map();
